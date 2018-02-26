@@ -77,10 +77,10 @@ public class EarthquakeCityMap extends PApplet {
 		// FOR TESTING: Set earthquakesURL to be one of the testing files by uncommenting
 		// one of the lines below.  This will work whether you are online or offline
 		//earthquakesURL = "test1.atom";
-		//earthquakesURL = "test2.atom";
+		// earthquakesURL = "test2.atom";
 		
 		// WHEN TAKING THIS QUIZ: Uncomment the next line
-		//earthquakesURL = "quiz1.atom";
+		earthquakesURL = "quiz1.atom";
 		
 		
 		// (2) Reading in earthquake data and geometric properties
@@ -170,7 +170,8 @@ public class EarthquakeCityMap extends PApplet {
 		// If isInCountry ever returns true, isLand should return true.
 		for (Marker m : countryMarkers) {
 			// TODO: Finish this method using the helper method isInCountry
-			
+			if (isInCountry(earthquake, m))
+				return true;
 		}
 		
 		
@@ -212,6 +213,29 @@ public class EarthquakeCityMap extends PApplet {
 		//        String country = (String)m.getProperty("country");
 		
 		
+		// List each country for which there was 1+ quakes and the number of earthquakes in that country
+		// Print number of quakes in the ocean
+		// Example: Albania: 9
+		//          Ocean  : 37
+		
+		for (Marker cm : countryMarkers) {
+			int countryQuakeCounter = 0;
+			
+			for (Marker qm : quakeMarkers) {
+				if (qm instanceof LandQuakeMarker && qm.getProperty("country") == cm.getProperty("name"))
+					countryQuakeCounter += 1;
+			}
+			
+			System.out.println(cm.getProperty("name") + " : " + countryQuakeCounter);
+		}
+		
+		int oceanQuakeCounter = 0;
+		for (Marker qm : quakeMarkers) {
+			if (qm instanceof OceanQuakeMarker)
+				oceanQuakeCounter += 1;
+		}
+		System.out.println("Ocean : " + oceanQuakeCounter);
+			
 	}
 	
 	

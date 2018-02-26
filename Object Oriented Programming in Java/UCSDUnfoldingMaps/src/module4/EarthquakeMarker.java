@@ -45,7 +45,7 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 	
 	// constructor
 	public EarthquakeMarker (PointFeature feature) 
-	{
+	{	
 		super(feature.getLocation());
 		// Add a radius property and then set the properties
 		java.util.HashMap<String, Object> properties = feature.getProperties();
@@ -67,7 +67,10 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 		// call abstract method implemented in child class to draw marker shape
 		drawEarthquake(pg, x, y);
 		
-		// OPTIONAL TODO: draw X over marker if within past day		
+		// OPTIONAL TODO: draw X over marker if within past day
+//		boolean pastDay = this.getProperty("age") == "Past Day";
+//		if (pastDay)
+//			pg.text('X', x, y);
 		
 		// reset to previous styling
 		pg.popStyle();
@@ -81,6 +84,14 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 	// You might find the getters below helpful.
 	private void colorDetermine(PGraphics pg) {
 		//TODO: Implement this method
+		
+		float quakeDepth = this.getDepth();
+		if (quakeDepth < THRESHOLD_INTERMEDIATE)
+			pg.fill(255, 255, 100);
+		else if (quakeDepth >= THRESHOLD_INTERMEDIATE && quakeDepth < THRESHOLD_DEEP)
+			pg.fill(0, 0, 255);
+		else
+			pg.fill(255, 0, 0);
 	}
 	
 	

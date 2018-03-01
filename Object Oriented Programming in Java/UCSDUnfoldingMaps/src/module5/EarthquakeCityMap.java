@@ -11,7 +11,7 @@ import de.fhpotsdam.unfolding.geo.Location;
 import de.fhpotsdam.unfolding.marker.AbstractShapeMarker;
 import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MultiMarker;
-import de.fhpotsdam.unfolding.providers.Google;
+import de.fhpotsdam.unfolding.providers.OpenStreetMap;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import parsing.ParseFeed;
@@ -70,7 +70,7 @@ public class EarthquakeCityMap extends PApplet {
 		    earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
 		}
 		else {
-			map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+			map = new UnfoldingMap(this, 200, 50, 650, 600, new OpenStreetMap.OpenStreetMapProvider());
 			// IF YOU WANT TO TEST WITH A LOCAL FILE, uncomment the next line
 		    //earthquakesURL = "2.5_week.atom";
 		}
@@ -146,6 +146,15 @@ public class EarthquakeCityMap extends PApplet {
 	private void selectMarkerIfHover(List<Marker> markers)
 	{
 		// TODO: Implement this method
+		for (Marker m : markers) {
+			if (m.isInside(map, mouseX, mouseY) && lastSelected == null) {
+				lastSelected = (CommonMarker) m;
+				lastSelected.setSelected(true);
+				// System.out.println(m.getStringProperty("country") + " is selected!"); // For debugging
+				break;
+			}
+				
+		}
 	}
 	
 	/** The event handler for mouse clicks
@@ -159,8 +168,65 @@ public class EarthquakeCityMap extends PApplet {
 		// TODO: Implement this method
 		// Hint: You probably want a helper method or two to keep this code
 		// from getting too long/disorganized
+		if (lastClicked != null) {
+			lastClicked.setClicked(false);
+			unhideMarkers();
+			lastClicked = null;
+		} else {
+			selectMarkerIfClicked(quakeMarkers);
+			selectMarkerIfClicked(cityMarkers);
+			
+			if (lastClicked instanceof EarthquakeMarker) {
+				// System.out.println("Earthquake clicked...");
+				hideQuakeMarkesExceptClicked();
+				double threatDistanceInKm = ((EarthquakeMarker) lastClicked).threatCircle();
+				// System.out.println("Threat distance in km is " + threatDistanceInKm);
+				
+				for (Marker m : cityMarkers) {
+					double distanceToCity = lastClicked.getDistanceTo(m.getLocation());
+					if (distanceToCity > threatDistanceInKm)
+						m.setHidden(true);
+				}
+				
+			} else if (lastClicked instanceof CityMarker) {
+				System.out.println("City clicked...");
+				hideCityMarkersExceptClicked();
+				for (Marker m : quakeMarkers) {
+					if (m.getDistanceTo(lastClicked.getLocation()) > ((EarthquakeMarker) m).threatCircle())
+						m.setHidden(true);
+				}
+			}
+		}
+		
+		
+
+	}
+
+	// Copy of selectMarkerIfHover but for action 'clicked' instead
+	private void selectMarkerIfClicked(List<Marker> markers) {
+		for (Marker m : markers) {
+			if (m.isInside(map, mouseX, mouseY)) {
+				lastClicked = (CommonMarker) m;
+				lastClicked.setClicked(true);
+				// System.out.println("Oh yeah... something something was clicked...");
+				break;
+			}
+		}
 	}
 	
+	private void hideQuakeMarkesExceptClicked() {
+		for (Marker m : quakeMarkers) {
+			if (m != lastClicked)
+				m.setHidden(true);
+		}
+	}
+	
+	private void hideCityMarkersExceptClicked() {
+		for (Marker m : cityMarkers) {
+			if (m != lastClicked)
+				m.setHidden(true);
+		}
+	}
 	
 	// loop over and unhide all markers
 	private void unhideMarkers() {

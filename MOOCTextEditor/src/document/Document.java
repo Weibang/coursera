@@ -67,7 +67,40 @@ public abstract class Document {
 		// TODO: Implement this method so that you can call it from the 
 	    // getNumSyllables method in BasicDocument (module 2) and 
 	    // EfficientDocument (module 3).
-	    return 0;
+		word = word.toLowerCase();
+		int syllables = 0;
+		String letter;
+		Boolean thisCharIsVowel = false;
+		Boolean lastCharWasVowel = false;
+		String vowels = "aeiouy";
+		
+		// Account for common cases first
+		for (int i = 0; i < word.length(); i++) {
+			letter = Character.toString(word.charAt(i));
+			thisCharIsVowel = vowels.contains(letter);
+			
+			if (!thisCharIsVowel) {
+				lastCharWasVowel = false;
+			} else {
+				if (lastCharWasVowel) {
+					continue;
+				} else {
+					syllables++;
+					lastCharWasVowel = true;
+				}
+			}
+			
+			// Remove extra syllable count for lone 'e' at the end
+			if (i == word.length() - 1 && word.charAt(i) == 'e' && syllables > 1) {
+				syllables--;
+			}
+		}
+		
+		
+		// For debugging
+		 //System.out.println("Word [" + word + "] \t\t\thas " + syllables + " syllable(s)");
+		
+	    return syllables;
 	}
 	
 	/** A method for testing
@@ -132,9 +165,9 @@ public abstract class Document {
 	{
 	    // TODO: You will play with this method in week 1, and 
 		// then implement it in week 2
-	    return text.length();
+		double wps = 1.015 * ((double) getNumWords() / getNumSentences());
+		double spw = 84.6 * ((double) getNumSyllables() / getNumWords());
+		double score = 206.835 - wps - spw;
+	    return score;
 	}
-	
-	
-	
 }

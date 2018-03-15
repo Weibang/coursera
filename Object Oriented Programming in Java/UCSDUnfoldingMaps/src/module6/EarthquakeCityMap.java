@@ -12,7 +12,7 @@ import de.fhpotsdam.unfolding.geo.Location;
 import de.fhpotsdam.unfolding.marker.AbstractShapeMarker;
 import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MultiMarker;
-import de.fhpotsdam.unfolding.providers.Google;
+import de.fhpotsdam.unfolding.providers.OpenStreetMap;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import parsing.ParseFeed;
@@ -73,7 +73,7 @@ public class EarthquakeCityMap extends PApplet {
 		    earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
 		}
 		else {
-			map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+			map = new UnfoldingMap(this, 200, 50, 650, 600, new OpenStreetMap.OpenStreetMapProvider());
 			// IF YOU WANT TO TEST WITH A LOCAL FILE, uncomment the next line
 		    //earthquakesURL = "2.5_week.atom";
 		}
@@ -82,7 +82,7 @@ public class EarthquakeCityMap extends PApplet {
 		// FOR TESTING: Set earthquakesURL to be one of the testing files by uncommenting
 		// one of the lines below.  This will work whether you are online or offline
 		//earthquakesURL = "test1.atom";
-		//earthquakesURL = "test2.atom";
+		// earthquakesURL = "test2.atom";
 		
 		// Uncomment this line to take the quiz
 		//earthquakesURL = "quiz2.atom";
@@ -116,8 +116,9 @@ public class EarthquakeCityMap extends PApplet {
 	    }
 
 	    // could be used for debugging
-	    printQuakes();
-	 		
+	    // printQuakes();
+	 	sortAndPrint(10);
+	 	
 	    // (3) Add markers to map
 	    //     NOTE: Country markers are not added to the map.  They are used
 	    //           for their geometric properties
@@ -139,6 +140,34 @@ public class EarthquakeCityMap extends PApplet {
 	// TODO: Add the method:
 	//   private void sortAndPrint(int numToPrint)
 	// and then call that method from setUp
+	
+	private void sortAndPrint(int numToPrint) {
+		EarthquakeMarker[] sortedQuakes = new EarthquakeMarker[quakeMarkers.size()];
+		quakeMarkers.toArray(sortedQuakes);
+		EarthquakeMarker tempQuake;
+		int index;
+		
+		for (int i = 0; i < sortedQuakes.length-1; i++) {
+			index = i;
+			
+			for (int j = i+1; j < sortedQuakes.length; j++) {
+				if ( sortedQuakes[j].getMagnitude() > sortedQuakes[index].getMagnitude()) {
+					//System.out.println(sortedQuakes[j].getMagnitude() + " > " + sortedQuakes[i].getMagnitude());
+					index = j;
+				}
+			}
+			
+			tempQuake = sortedQuakes[i];
+			sortedQuakes[i] = sortedQuakes[index];
+			sortedQuakes[index] = tempQuake;
+		}
+		
+		// Print all quakes OR up to numToPrint
+		int numQuakes = (numToPrint < sortedQuakes.length) ? numToPrint : sortedQuakes.length;
+		for (int i = 0; i < numQuakes; i++) {
+			System.out.println("Magnitude: " + sortedQuakes[i].getMagnitude());
+		}
+	}
 	
 	/** Event handler that gets called automatically when the 
 	 * mouse moves.
